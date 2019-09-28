@@ -2,6 +2,7 @@
 Sentiment Analysis with an RNN
 """
 from Preprocess import Preprocess
+import numpy as np
 
 
 def load_data(filepath):
@@ -46,12 +47,33 @@ def main():
     for review in reviews_split:
         review_ints.append([vocab_to_int[word] for word in review.split()])
 
+    # encode labels
+    labels_split = labels.split("\n")
+    encoded_labels = np.array([1 if label == "positive" else 0 for label in labels_split])
+
     # visualize review integers
     print('Unique words: ', len(vocab_to_int))
     print(review_ints[:1])
+    print(encoded_labels[:10])
 
-    # TODO: Remove outliers
-    # TODO: pad sequences with 0
+    # remove outliers
+    review_ints, encoded_labels = preprocess.remove_outliers(review_ints, encoded_labels)
+
+    # pad sequences with 0
+    seq_length = 200
+
+    features = preprocess.pad_features(review_ints, seq_length)
+
+    # test statements
+    assert len(features) == len(review_ints), "Your features should have as many rows as reviews."
+    assert len(features[0]) == seq_length, "Each feature row should contain seq_length values."
+
+    # print first 10 values of the first 30 batches
+    print(features[:30, :10])
+
+    # TODO: Train test valid split
+    # TODO: batch,data loaders
+
 
 if __name__ == "__main__":
     main()

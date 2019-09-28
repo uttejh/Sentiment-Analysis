@@ -1,5 +1,6 @@
 from string import punctuation
 from collections import Counter
+import numpy as np
 
 
 class Preprocess:
@@ -45,4 +46,46 @@ class Preprocess:
         vocab_to_int = {word: ii for ii, word in enumerate(vocab, 1)}
 
         return vocab_to_int
+
+    def remove_outliers(self, data, labels):
+        """
+        removes reviews that are too small (empty)
+        Args:
+            data (list): list of reviews
+            labels (ndarray): numpy array of labels in integer form
+
+        Returns:
+            list: list of reviews
+            ndarray: numpy array of labels
+        """
+        data_size = len(data)
+
+        non_zero_index = [ii for ii, review in enumerate(data) if len(review) != 0]
+        data = [data[ii] for ii in non_zero_index]
+        labels = np.array([labels[ii] for ii in non_zero_index])
+
+        print("Number of reviews removed:"+str(data_size - len(data)))
+
+        return data, labels
+
+    def pad_features(self, data, seq_length):
+        """
+        Return features of review_ints, where each review is padded with 0's
+        or truncated to the input seq_length
+        Args:
+            data(list): encoded integer list of reviews
+            seq_length(int): threshold limit of each review
+
+        Returns:
+            feature_matrix(ndarray): feature matrix of review integers
+
+        """
+        # create an empty matrix
+        feature_matrix = np.zeros((len(data), seq_length), dtype=int)
+
+        # for each review
+        for i, row in enumerate(data):
+            feature_matrix[i, -len(row):] = np.array(row)[:seq_length]
+
+        return feature_matrix
 
