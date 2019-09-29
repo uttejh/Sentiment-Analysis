@@ -3,6 +3,7 @@ Sentiment Analysis with an RNN
 """
 from Preprocess import Preprocess
 import numpy as np
+from Train import Train
 
 
 def load_data(filepath):
@@ -71,8 +72,8 @@ def main():
     # print first 10 values of the first 30 batches
     print(features[:30, :10])
 
-    # TODO: Train test valid split
     # TODO: batch,data loaders
+    train = Train(features, encoded_labels)
 
 
 if __name__ == "__main__":
