@@ -72,7 +72,7 @@ def main():
     # print first 10 values of the first 30 batches
     print(features[:30, :10])
 
-    # TODO: batch,data loaders
+    # initiate train TODO: reformat this comment
     train = Train(features, encoded_labels)
 
 
