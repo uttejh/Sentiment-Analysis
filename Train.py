@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-
+from Network import Network
 
 class Train:
     """
@@ -35,7 +35,7 @@ class Train:
 
         # visualize a batch
         self.visualize_batch()
-        # TODO: create a class Network
+
         # TODO: create a func train_model that uses network
 
     def create_dataloader(self, data_x, data_y):
@@ -68,3 +68,15 @@ class Train:
         print()
         print('Sample label size: ', sample_y.size())  # batch_size
         print('Sample label: \n', sample_y)
+
+    def instantiate_model(self, vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers):
+        vocab_size = len(vocab_to_int) + 1
+
+        net = Network(vocab_size, output_size, embedding_dim, hidden_dim, n_layers)
+
+        return net
+
+    def train_model(self, vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers, lr, epochs):
+        net = self.instantiate_model(vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers)
+        print(net)
+

@@ -75,6 +75,11 @@ def main():
     # initiate train TODO: reformat this comment
     train = Train(features, encoded_labels)
 
+    hyperparameters = {"vocab_to_int": vocab_to_int, "embedding_dim": 400,
+                       "hidden_dim": 256, "output_size": 1, "n_layers": 2,
+                       "lr": 0.001, "epochs": 4}
+    train.train_model(**hyperparameters)
+
 
 if __name__ == "__main__":
     main()

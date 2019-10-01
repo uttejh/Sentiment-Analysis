@@ -2,7 +2,13 @@ import torch.nn as nn
 
 
 class Network(nn.Module):
+    """
+    The RNN LSTM model used for sentiment analysis
+    """
     def __init__(self, vocab_size, output_size, embedding_dim, hidden_dim, n_layers, drop_prob=0.5):
+        """
+        Initialize the model and set up the layers
+        """
         super().__init__()
 
         # hyperparameters
@@ -24,6 +30,9 @@ class Network(nn.Module):
         self.sig = nn.Sigmoid()
 
     def forward(self, x, hidden):
+        """
+        Perform a forward pass
+        """
         batch_size = x.size(0)
 
         x = x.long()
@@ -50,6 +59,9 @@ class Network(nn.Module):
         return sig_out, hidden
 
     def init_hidden(self, batch_size):
+        """
+        Intitialize the hidden state
+        """
         weight = next(self.parameters()).data
 
         hidden = (weight.new(self.n_layers, batch_size, self.hidden_dim).zero_(),
