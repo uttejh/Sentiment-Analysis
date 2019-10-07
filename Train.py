@@ -1,6 +1,8 @@
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 from Network import Network
+import torch.nn as nn
+import numpy as np
 
 class Train:
     """
@@ -79,4 +81,65 @@ class Train:
     def train_model(self, vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers, lr, epochs):
         net = self.instantiate_model(vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers)
         print(net)
+
+        criterion = nn.BCELoss()
+        optimizer = torch.optim.Adam(net.parameters(), lr=lr)
+
+        # training params
+
+        epochs = 4  # 3-4 is approx where I noticed the validation loss stop decreasing
+
+        counter = 0
+        print_every = 100
+        clip = 5  # gradient clipping
+
+        net.train()
+
+        for e in range(epochs):
+            # initialize hidden state
+            h = net.init_hidden(self.batch_size)
+
+            # batch loop
+            for inputs, labels in self.train_loader:
+                counter += 1
+
+                # Creating new variables for the hidden state, otherwise
+                # we'd backprop through the entire training history
+                h = tuple([each.data for each in h])
+
+                # zero accumulated gradients
+                net.zero_grad()
+
+                # get the output from the model
+                output, h = net(inputs, h)
+
+                # calculate the loss and perform backprop
+                loss = criterion(output.squeeze(), labels.float())
+                loss.backward()
+                # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
+                nn.utils.clip_grad_norm_(net.parameters(), clip)
+                optimizer.step()
+
+                # loss stats
+                if counter % print_every == 0:
+                    # Get validation loss
+                    val_h = net.init_hidden(self.batch_size)
+                    val_losses = []
+                    net.eval()
+                    for inputs, labels in self.val_loader:
+
+                        # Creating new variables for the hidden state, otherwise
+                        # we'd backprop through the entire training history
+                        val_h = tuple([each.data for each in val_h])
+
+                        output, val_h = net(inputs, val_h)
+                        val_loss = criterion(output.squeeze(), labels.float())
+
+                        val_losses.append(val_loss.item())
+
+                    net.train()
+                    print("Epoch: {}/{}...".format(e + 1, epochs),
+                          "Step: {}...".format(counter),
+                          "Loss: {:.6f}...".format(loss.item()),
+                          "Val Loss: {:.6f}".format(np.mean(val_losses)))
 
