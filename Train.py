@@ -79,6 +79,9 @@ class Train:
         return net
 
     def train_model(self, vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers, lr, epochs):
+        """
+        Train the model
+        """
         net = self.instantiate_model(vocab_to_int, embedding_dim, hidden_dim, output_size, n_layers)
         print(net)
 
@@ -143,3 +146,48 @@ class Train:
                           "Loss: {:.6f}...".format(loss.item()),
                           "Val Loss: {:.6f}".format(np.mean(val_losses)))
 
+        return net
+
+    def test_model(self, net):
+        """
+        Test overall performance of the model
+        """
+        # Get test data loss and accuracy
+
+        test_losses = []  # track loss
+        num_correct = 0
+
+        # init hidden state
+        h = net.init_hidden(self.batch_size)
+
+        net.eval()
+        # iterate over test data
+        for inputs, labels in self.test_loader:
+
+            # Creating new variables for the hidden state, otherwise
+            # we'd backprop through the entire training history
+            h = tuple([each.data for each in h])
+
+            # get predicted outputs
+            output, h = net(inputs, h)
+            criterion = nn.BCELoss()
+
+            # calculate loss
+            test_loss = criterion(output.squeeze(), labels.float())
+            test_losses.append(test_loss.item())
+
+            # convert output probabilities to predicted class (0 or 1)
+            pred = torch.round(output.squeeze())  # rounds to the nearest integer
+
+            # compare predictions to true label
+            correct_tensor = pred.eq(labels.float().view_as(pred))
+            correct = np.squeeze(correct_tensor.numpy())
+            num_correct += np.sum(correct)
+
+        # -- stats! -- ##
+        # avg test loss
+        print("Test loss: {:.3f}".format(np.mean(test_losses)))
+
+        # accuracy over all test data
+        test_acc = num_correct / len(self.test_loader.dataset)
+        print("Test accuracy: {:.3f}".format(test_acc))

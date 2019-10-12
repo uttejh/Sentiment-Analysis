@@ -1,6 +1,6 @@
-from string import punctuation
 from collections import Counter
 import numpy as np
+from string import punctuation
 
 
 class Preprocess:
@@ -88,4 +88,21 @@ class Preprocess:
             feature_matrix[i, -len(row):] = np.array(row)[:seq_length]
 
         return feature_matrix
+
+    def tokenize_review(test_review, vocab_to_int):
+        """
+        tokenize an individual review
+        """
+        test_review = test_review.lower()  # lowercase
+        # get rid of punctuation
+        test_text = ''.join([c for c in test_review if c not in punctuation])
+
+        # splitting by spaces
+        test_words = test_text.split()
+
+        # tokens
+        test_ints = []
+        test_ints.append([vocab_to_int[word] for word in test_words])
+
+        return test_ints
 
